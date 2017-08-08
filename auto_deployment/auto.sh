@@ -16,12 +16,21 @@
 #判断文件夹是否存在；不存在进行创建；
 function mk_dire() {
     if [ ! -d $1 ];then
-        echo "$Time 创建目录$1"  | tee -a  $Logs_path/local.log
         mkdir -p $1
-        if [ ! -d $1 ];then
-            echo "$Time 创建目录$1失败" | tee -a  $Logs_path/local.log
+        if [ $? -ne 0  ];then
+            echo -e "\e[1;36m" "$Time 创建目录$1 " $(tput sgr0) "Failed" | tee -a  $Logs_path/local.log
             exit 1
+        else
+            echo -e "\e[1;31m" "$Time 创建目录$1 "$(tput sgr0) "Success" | tee -a  $Logs_path/local.log
         fi
+    fi
+}
+#判断上条命令执行结果
+function check_work() {
+    if [ $? -eq 0 ];then
+        echo -e "\e[1;32m"  "$Time $1 "  $(tput sgr0) "Success"  | tee -a  ${Work_path}/$Build_num/logs/script.log
+    else
+        echo -e "\e[1;32m"  "$Time $1 "  $(tput sgr0) "Failed"   | tee -a ${Work_path}/$Build_num/logs/script.log
     fi
 }
 
@@ -60,7 +69,7 @@ else
     cd $Work_path
     id_num=`ls | wc -l `
     if [ $id_old -ne $id_num ];then
-        echo -e "\e[1;31m" "$Time Build版本id值错误；文件内的值为${id_old};work下的版本为${id_num}" | tee -a $Logs_path/error.log
+        echo -e "\e[1;31m" "$Time Build版本id值错误；文件内的值为${id_old};work目录内当前的版本为${id_num}" | tee -a $Logs_path/local.log
         exit 1
     fi
 fi
@@ -68,35 +77,58 @@ fi
 #获取本次build_id
 get_id=`cat $Build_id `
 Build_num=$(( $get_id + 1 ))
-export Build_num
 if [ $? -ne 0 ];then
-    echo -e  "\e[1;31m" "$Time 获取本次build_id失败"  ${resettem} | tee  -a $Logs_path/error.log
+    echo -e "\e[1;31m" "$Time 获取本次build_id失败"  ${resettem} | tee  -a $Logs_path/local.log
     exit 1
 else
-    echo -e "\e[1;36m" "$Time 本次build_id为"  ${resettem}  ${Build_num}
+    echo -e "\e[1;36m" "$Time 本次build_id为"  ${resettem}  ${Build_num} | tee  -a $Logs_path/local.log
 fi
+
+export Build_num
 #更新build_id
 echo $Build_num >$Build_id
 
+#############################工作目录###############################
 #创建本次build目录和目录下的日志
-/bin/mkdir  -p   ${Work_path}/${Build_num}/logs
-if [ ! -d  ${Work_path}/${Build_num}/logs ];then
-    echo "$Time 第${Build_num}次构建  创建${Build_num}目录失败 "  | tee -a ${Logs_path}/error.log
-fi
+###老版本###
+# /bin/mkdir  -p   ${Work_path}/${Build_num}/logs
+# if [ ! -d  ${Work_path}/${Build_num}/logs ];then
+#     echo "$Time 第${Build_num}次构建  创建${Build_num}目录失败 "  | tee -a ${Logs_path}/error.log
+# fi
+##########
+mk_dire ${Work_path}/${Build_num}/logs
+
 
 #项目build
-echo "本次build的时间 $Time" | tee -a  ${Work_path}/$Build_num/logs/script.log
+echo  -e "\e[1;32m" "$Time Build构建开始" | tee -a  ${Work_path}/$Build_num/logs/script.log
 cd $Code_path/USTrade_YJ
 git pull &>${Work_path}/$Build_num/logs/pull.log
-if [ $? -ne  0 ];then
-    echo "$Time 项目pull失败"  | tee -a ${Work_path}/$Build_num/logs/script.log
-fi
+
+# if [ $? -ne  0 ];then
+#     echo "$Time 项目pull失败"  | tee -a ${Work_path}/$Build_num/logs/script.log
+# fi
+
+check_work  "项目pull"
+
+
+
 /usr/local/maven/bin/mvn clean package -DskipTests  &> ${Work_path}/$Build_num/logs/build.log
-if [ $? -ne 0 ];then
-    echo "$Time 项目打包失败"  | tee -a ${Work_path}/$Build_num/logs/script.log
-    exit 1
-else
-    echo "$Time 项目打包成功"  | tee -a ${Work_path}/$Build_num/logs/script.log
+# if [ $? -ne 0 ];then
+#     echo "$Time 项目打包失败"  | tee -a ${Work_path}/$Build_num/logs/script.log
+#     exit 1
+# else
+#     echo "$Time 项目打包成功"  | tee -a ${Work_path}/$Build_num/logs/script.log
+# fi
+check_work "项目打包"
+
+#清除build目录内USTrade项目文件
+if [ -d ${Build_path}/USTrade ];then
+    echo "$Time 清除Build目录内的USTrade项目"  | tee -a ${Work_path}/$Build_num/logs/script.log
+    rm -rf ${Build_path}/USTrade
+    # if [ -d ${Build_path}/USTrade ];then
+    #     echo "$Time 删除Build原有目录失败" | tee -a  ${Logs_path}/error.log
+    # fi
+    check_work  "删除Build目录下原USTrade"
 fi
 
 #git 初始化
@@ -108,21 +140,16 @@ if [ $Build_num -eq 1 ] &&  [ ! -f ${Build_path}/init ];then
     git commit -m "初始化"
 fi
 
-#清除build目录内USTrade项目文件
-if [ -d ${Build_path}/USTrade ];then
-    echo "$Time 清除Build目录内的USTrade项目"  | tee -a ${Work_path}/$Build_num/logs/script.log
-    rm -rf ${Build_path}/USTrade
-    if [ -d ${Build_path}/USTrade ];then
-        echo "$Time 删除Build原有目录失败" | tee -a  ${Logs_path}/error.log
-    fi
-fi
+
 
 #移动项目生成文件到build
 mv ${Code_path}/USTrade_YJ/target/USTrade_yj  ${Build_path}/USTrade   &>/dev/null
-if [ $? -ne 0 ];then
-    echo "$Time build文件迁移失败" | tee -a ${Logs_path}/error.log
-    exit 1
-fi
+# if [ $? -ne 0 ];then
+#     echo "$Time build文件迁移失败" | tee -a ${Logs_path}/error.log
+#     exit 1
+# fi
+check_work  "Code源码编译生成USTrade移动到${Build_path}"
+
 
 #获取目录改变列表
 cd ${Build_path}
@@ -130,17 +157,18 @@ git add *
 git diff HEAD --name-status >  ${Work_path}/$Build_num/git_diff.log
 git commit -m "第${Build_num}次提交"  &>/dev/null
 if [ $? -eq 0  ];then
-    echo "$Time 第${Build_num}次部署;获取项目目录变动列表success"| tee -a  ${Work_path}/$Build_num/logs/script.log
+    echo -e "\e[1;36m" "$Time 第${Build_num}次部署;获取项目目录变动列表success"  ${resettem} | tee -a ${Work_path}/$Build_num/logs/script.log
 elif [ $? -eq 1 ];then
-    echo "$Time 第${Build_num}次部署；项目内容没有变动；停止部署" | tee -a ${Logs_path}/error.log
+    echo -e "\e[1;33m" "$Time 第${Build_num}次部署;项目内容没有变动;中止部署"    ${resettem} | tee -a ${Work_path}/$Build_num/logs/script.log
     exit 1
 else
-    echo "$Time 第${Build_num}次部署;获取项目目录改变列表失败"  | tee -a ${Logs_path}/error.log
+    echo -e "\e[1;31m" "$Time 第${Build_num}次部署;获取项目目录改变列表失败；停止部署"  ${resettem}  | tee -a ${Work_path}/$Build_num/logs/script.log
     exit 1
 fi
 sh  /root/autodeployment/script/file_move.sh
-if [ $?  -ne 0 ];then
-    echo "file_move脚本执行出现错误"  | tee -a ${Work_path}/$Build_num/logs/script.log
-else
-    echo "脚本执行完毕"
-fi
+# if [ $?  -ne 0 ];then
+#     echo "file_move脚本执行出现错误"  | tee -a ${Work_path}/$Build_num/logs/script.log
+# else
+#     echo "脚本执行完毕"
+# fi
+check_work "脚本file_move执行"
