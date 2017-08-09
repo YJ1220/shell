@@ -41,7 +41,8 @@ function dic_path {
 #############################工作目录###############################
 #创建本次build目录和目录下的日志
 mk_dire ${Work_path}/${Build_num}/logs
-
+mk_dire ${Work_path}/${Build_num}/new_web
+mk_dire ${Work_path}/${Build_num}/old_web
 
 #项目build
 echo  -e "\e[1;32m" "$Time Build构建开始"  $(tput sgr0) | tee -a  ${Work_path}/$Build_num/logs/script.log
@@ -75,6 +76,8 @@ fi
 
 
 
+
+
 #移动项目生成文件到build
 mv ${Code_path}/USTrade_YJ/target/USTrade_yj  ${Build_path}/USTrade   &>/dev/null
 check_work  "Code源码编译生成USTrade移动到${Build_path}"
@@ -97,9 +100,6 @@ else
     exit 1
 fi
 
-
-mk_dire ${Work_path}/${Build_num}/new_web
-mk_dire ${Work_path}/${Build_num}/old_web
 
 
 #进入本次build目录；获取本次构建新增和修改文件进行压缩；将压缩后的文件移动到本次build下的new_web目录
