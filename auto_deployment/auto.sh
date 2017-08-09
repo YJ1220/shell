@@ -27,10 +27,10 @@ function mk_dire() {
 function check_script() {
     if [ $? -eq 0 ];then
         echo -e "\e[1;36m"  "$Time $1 "  $(tput sgr0) "Success"  | tee -a  $Logs_path/local.log
-#        echo -e "\e[1;36m"  "$Time 本次部署"  $(tput sgr0) "Success" | tee -a  $Logs_path/local.log
     else
         echo -e "\e[1;31m"  "$Time $1 "  $(tput sgr0) "Failed"   | tee -a  $Logs_path/local.log
         echo -e "\e[1;31m"  "$Time 本次部署"  $(tput sgr0) "Failed" | tee -a  $Logs_path/local.log
+        exit 1
     fi
 }
 ################################################################################
@@ -45,7 +45,7 @@ Web_Path="/usr/local/tomcat_trade/webapps"
 Server_path="/usr/local/tomcat_trade"
 Time=`date +'%F %H:%M'`
 resettem=$(tput sgr0)
-export Code_path Build_path Logs_path Work_path Web_Path Time Build_id resettem
+export Code_path Build_path Logs_path Work_path Web_Path Time Build_id resettem Server_path
 
 #变量数组;判断文件夹是否存在
 declare  -a   Local_path
@@ -70,7 +70,7 @@ else
     cd $Work_path
     id_num=`ls | wc -l `
     if [ $id_old -ne $id_num ];then
-        echo -e "\e[1;31m" "$Time Build版本id值错误；文件内的值为${id_old};work目录内当前的版本为${id_num}" | tee -a $Logs_path/local.log
+        echo -e "\e[1;31m" "$Time Build版本id值错误；文件内的值为${id_old};work目录内当前的版本为${id_num}" ${resettem}| tee -a $Logs_path/local.log
         exit 1
     fi
 fi
@@ -95,6 +95,6 @@ sh  /root/autodeployment/script/work.sh
 check_script "脚本work执行"
 
 sh /root/autodeployment/script/restart.sh
-
 check_script "脚本work执行"
+
 echo -e "\e[1;35m"  "$Time 本次部署"  $(tput sgr0) "Success" | tee -a  $Logs_path/local.log
