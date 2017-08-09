@@ -39,7 +39,8 @@ function stop_server() {
 #启动服务
 function start_server() {
     cd ${Server_path}/bin
-    ./startup.sh
+    echo ""  > ${Server_path}/logs/catalina.out
+    ./startup.sh &> /dev/null
     sleep 5
     Status_num_start=`ps aux | grep  tomcat_trade  | grep -v grep | wc -l`
     if [ ${Status_num_start} -ne 1 ];then
