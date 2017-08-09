@@ -43,13 +43,14 @@ Work_path='/root/autodeployment/work'
 Build_id='/root/autodeployment/build.txt'
 Web_Path="/usr/local/tomcat_trade/webapps"
 Server_path="/usr/local/tomcat_trade"
+Reset_path="/root/autodeployment/reset"
 Time=`date +'%F %H:%M'`
 resettem=$(tput sgr0)
-export Code_path Build_path Logs_path Work_path Web_Path Time Build_id resettem Server_path
+export Code_path Build_path Logs_path Work_path Web_Path Time Build_id resettem Server_path  Reset_path
 
 #变量数组;判断文件夹是否存在
 declare  -a   Local_path
-Local_path=($Code_path $Build_path $Logs_path $Work_path )
+Local_path=($Code_path $Build_path $Logs_path $Work_path  $Reset_path )
 for i in ${Local_path[@]};do
     mk_dire $i
 done

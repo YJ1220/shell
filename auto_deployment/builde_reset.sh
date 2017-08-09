@@ -71,6 +71,7 @@ Work_path='/root/autodeployment/work'
 Logs_path='/root/autodeployment/logs'
 Web_Path="/usr/local/tomcat_trade/webapps"
 Server_path="/usr/local/tomcat_trade"
+Reset_path="/root/autodeployment/reset"
 
 if [ -f $Web_Path/USTrade.zip ];then
     rm -rf $Web_Path/USTrade.zip
@@ -104,7 +105,8 @@ fi
 
 
 #当前版本构建工作目录备份
-mv  ${Work_path}/${Build_id}   ${Work_path}/${Build_id}_`date +%F`
+
+mv  ${Work_path}/${Build_id}   ${Reset_path}/${Build_id}_`date +%F`
 check_work "当前版本work目录进行备份"
 
 #修改Build_id
