@@ -243,7 +243,7 @@ check_work  "Code源码编译后生成${Sou_name}移动到${Project_repo}"
 
 #获取目录改变列表
 cd ${Project_repo}
-dic_path ${Project_repo}
+dic_path "${Project_repo}"
 
 git add *
 git diff HEAD --name-status >  ${Work_logs}/git_diff.log
@@ -265,7 +265,7 @@ fi
 
 #进入项目本地repo目录；获取本次构建新增和修改文件进行压缩；将压缩后的文件移动到本次work下的new_web目录
 cd ${Project_repo}
-dic_path ${Projecgt_repo}
+dic_path "${Project_repo}"
 
 awk '{ if ( $1 == "A") { print $2 } else if ( $1 == "M") {print $2}}'   ${Work_logs}/git_diff.log  | grep "^${Des_name}" |   xargs zip -r ${Des_name}.zip
 check_work  "根据变量列表;本次编译变更文件压缩包生成"

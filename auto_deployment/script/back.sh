@@ -7,7 +7,7 @@
 ######################################变量解释###################################
 # Project_work:自动部署的项目；一个自动部署项目一个目录
 # Project_repo:项目的本地提交目录；本地git commit使用
-# Build_id: 存储build次数
+# build_id: 存储build次数
 # Work_path: 各项目工作目录
 # Work_num: 每次部署生成当前对应的具体工作目录
 # Work_logs: 每次部署的工作日志
@@ -21,10 +21,10 @@
 #判断上条命令执行结果
 function check_work() {
     if [ $? -eq 0 ];then
-        echo -e "\e[1;36"  "$(date +'%F %H:%M') $1 "  $(tput sgr0) "Success"  | tee -a  ${Logs_path}/reset.log
+        echo -e "\e[1;36m" "$(date +'%F %H:%M') $1 "  $(tput sgr0) "Success"  | tee -a  ${Logs_path}/reset.log
     else
-        echo -e "\e[1;31m"  "$(date +'%F %H:%M') $1 "  $(tput sgr0) "Failed"   | tee -a  ${Logs_path}/reset.log
-        echo -e "\e[1;31m"  "$(date +'%F %H:%M') 本次版本回退失败"  | tee -a  ${Logs_path}/reset.log
+        echo -e "\e[1;31m" "$(date +'%F %H:%M') $1 "  $(tput sgr0) "Failed"   | tee -a  ${Logs_path}/reset.log
+        echo -e "\e[1;31m" "$(date +'%F %H:%M') 本次版本回退失败"  | tee -a  ${Logs_path}/reset.log
         exit 1
     fi
 }
@@ -38,7 +38,7 @@ function mk_dire() {
             echo -e "\e[1;31m" "$(date +'%F %H:%M') 创建目录$1 " $(tput sgr0) "Failed"  | tee -a  ${Logs_path}/reset.log
             echo -e "\e[1;31m" "$(date +'%F %H:%M') 本次部署"   $(tput sgr0) "Failed"   | tee -a  ${Logs_path}/reset.log
 
-            exit
+            exit 1
         fi
     fi
 }
@@ -112,7 +112,7 @@ echo -e "\e[1;36m" "当前版本为${build_id}"   $(tput sgr0) | tee -a ${Logs_p
 
 
 
-if [ ! -f ${Project_path}/${project_name}/${build_id}/logs/gitstatus ];then
+if [ ! -f ${Project_path}/${project_name}/workspace/${build_id}/logs/gitstatus ];then
     echo  -e "\e[1;31m"  "$(date +'%F %H:%M') gitstatus文件不存在，上次部署本地git commit 失败;"  $(tput sgr0)  | tee -a ${Logs_path}/reset.log
     exit 1
 fi
@@ -122,29 +122,29 @@ fi
 
 if [ -f ${Ser_path}/webapps/${Des_name}.zip ];then
     rm -rf ${Ser_path}/webapps/${Des_name}.zip
-    check_work "删除生产环境目录下${Des_name}.zip"
+    check_work "删除生产环境下项目的zip文件"
 fi
 
 cd ${Ser_path}/webapps
 dic_path ${Ser_path}/webapps
 
 #删除本次版本更新新增文件
-if `grep -q '^A'  ${Project_path}/${project_name}/${build_id}/logs/status.log `;then
-    awk '{ if ($1 == "A") { print $2 }}'  ${Project_path}/${project_name}/${build_id}/logs/git_diff.log | grep "^${Des_name}" | xargs rm -rf
-    check_work  "删除生产项目内本次build新增文件"
+if `grep -q '^A'  ${Project_path}/${project_name}/workspace/${build_id}/logs/status.log `;then
+    awk '{ if ($1 == "A") { print $2 }}'  ${Project_path}/${project_name}/workspace/${build_id}/logs/git_diff.log | grep "^${Des_name}" | xargs rm -rf
+    check_work "删除生产项目内当前版本新增文件"
 else
-    echo -e "\e[1;33m" "本次版本更新未增加新文件；不用删除项目内的文件"    $(tput sgr0) | tee -a  ${Logs_path}/reset.log
+    echo -e "\e[1;36m" "$(date +'%F %H:%M') 本次版本更新未增加新文件；不用删除项目内的文件"    $(tput sgr0) | tee -a  ${Logs_path}/reset.log
 fi
 
 #当前版本回退;原备份文件恢复
-if [ -f ${Project_path}/${project_name}/${build_id}/old_web/${Des_name}.zip  ];then
-    cp  ${Project_path}/${project_name}/${build_id}/old_web/${Des_name}.zip  ${Ser_path}/webapps
-    check_work "移动本次版本更新old_web下的${Des_name}.zip到webapps下"
+if [ -f ${Project_path}/${project_name}/workspace/${build_id}/old_web/${Des_name}.zip  ];then
+    cp  ${Project_path}/${project_name}/workspace/${build_id}/old_web/${Des_name}.zip  ${Ser_path}/webapps
+    check_work "移动本次版本更新old_web下的zip压缩文件到webapps下"
     sleep 5
     unzip -o ${Des_name}.zip
     check_work "解压备份${Des_name}.zip文件到生产目录"
 else
-    echo  -e "\e[1;31m"  "本次版本更新未修改和删除的文件;当前版本回退到上一版本不需要进行文件备份文件恢复" $(tput sgr0)  | tee -a  ${Logs_path}/reset.log
+    echo  -e "\e[1;31m"  "$(date +'%F %H:%M') 本次版本更新未修改和删除的文件;当前版本回退到上一版本不需要进行文件备份文件恢复" $(tput sgr0)  | tee -a  ${Logs_path}/reset.log
 fi
 
 
@@ -155,12 +155,12 @@ fi
 
 mk_dire ${Reset_path}/${project_name}
 
-mv  ${Project_path}/${project_name}/${build_id}   ${Reset_path}/${project_name}/${Build_id}_`date +%F`
+mv  ${Project_path}/${project_name}/workspace/${build_id}     ${Reset_path}/${project_name}/${build_id}_`date +'%F_%H:%M'`
 check_work "当前版本work目录进行备份"
 
 #修改Build_id
-Build_num=$(( $Build_id - 1 ))
-check_work  "修改版本ID；回退为上一版本ID"
+Build_num=$(( $build_id - 1 ))
+check_work  "修改版本ID回退为上一版本ID"
 
 echo    "${Build_num}"   >   ${Project_path}/${project_name}/build.txt
 
@@ -169,13 +169,13 @@ echo    "${Build_num}"   >   ${Project_path}/${project_name}/build.txt
 cd ${Local_repo}/${project_name}_repo
 dic_path "${Local_repo}/${project_name}_repo"
 
-echo -e "\e[1;33m" "本地repo目录下版本回退到上一版本"  $(tput sgr0) | tee -a  ${Logs_path}/reset.log
-git reset --hard HEAD^
+echo -e "\e[1;36m" "$(date +'%F %H:%M') 本地repo目录下版本回退到上一版本"  $(tput sgr0) | tee -a  ${Logs_path}/reset.log
+git reset --hard HEAD^  &>/dev/null
 check_work "本地repo目录版本回退"
 
 Status_num=`ps aux | grep  ${Ser_name}  | grep -v grep | wc -l`
 check_work "获取${project_name}服务运行状态"
-echo  -e "\e[1;36m" "项目${project_name}运行的总进程数为 "   $(tput sgr0)  ${Status_num}  | tee -a  ${Logs_path}/reset.log
+echo  -e "\e[1;36m" "$(date +'%F %H:%M') 项目${project_name}运行的总进程数为 "   $(tput sgr0)  ${Status_num}  | tee -a  ${Logs_path}/reset.log
 
 #重启服务
 if [ ${Status_num}  -eq 1  ];then

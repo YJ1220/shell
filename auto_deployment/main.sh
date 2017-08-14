@@ -33,7 +33,7 @@ function check_script() {
         echo -e "\e[1;31m"  "$(date +'%F %H:%M') $1 " $(tput sgr0) "Failed"       | tee -a  $Logs_path/local.log
         echo -e "\e[1;31m"  "$(date +'%F %H:%M') 本次部署"  $(tput sgr0) "Failed"  | tee -a  $Logs_path/local.log
 
-        exit 
+        exit
     fi
 }
 ################################################################################
@@ -69,7 +69,7 @@ cat  > ${Auto_path}/README.md  <<EOF
 * reset目录 ${Reset_path}:   各项目版本回退目录
 
 ##配置文件信息
-* main.conf: 主配置文件 
+* main.conf: 主配置文件
 * default.conf：各项目配置文件模板
 
 ##环境配置
@@ -97,7 +97,7 @@ Local_name=()
 # Repo_name=
 
 # Source_name: git clone的项目名；即项目clone下的文件名;存放在code目录(不能为空)
-# Sou_name= 
+# Sou_name=
 
 # Compile_name: mvn编译后，target下生成的编译完成的项目目录(默认与Sou_name一样)
 # Com_name=
@@ -105,7 +105,7 @@ Local_name=()
 # Destination_name: 各生产项目名;即存放于webapps下的(默认与Sou_name一样)
 # Des_name=
 
-# Server_name: 项目Server工作唯一识别信息(默认即为tomcat;多tomcat服务下，需要使用唯一特定标识）    
+# Server_name: 项目Server工作唯一识别信息(默认即为tomcat;多tomcat服务下，需要使用唯一特定标识）
 # Ser_name=
 
 # Server_path: Tomcat的安装目录(默认为/usr/local/tomcat）
@@ -133,36 +133,26 @@ do
         echo -e "\e[1;33m" "$(date +'%F %H:%M') ${project_name} 项目开始部署"  ${resettem}  | tee -a  $Logs_path/local.log
         sh ${Auto_path}/script/work.sh ${project_name}
         if [ $? -eq 0 ];then
-            echo -e "\e[1;36m"  "$(date +'%F %H:%M') 项目${project_name}部署 " $(tput sgr0) "Success"      | tee -a  $Logs_path/local.log
+            echo -e "\e[1;36m"  "$(date +'%F %H:%M') 项目${project_name}部署;脚本work.sh运行 " $(tput sgr0) "Success"      | tee -a  $Logs_path/local.log
         else
             echo -e "\e[1;31m"  "$(date +'%F %H:%M') 项目${project_name}部署 " $(tput sgr0) "Failed"       | tee -a  $Logs_path/local.log
-            echo -e "\e[1;31m"  "$(date +'%F %H:%M') 本次部署"  $(tput sgr0) "Failed"  | tee -a  $Logs_path/local.log
-            exit 
+            echo -e "\e[1;31m"  "$(date +'%F %H:%M') 本次部署i"  $(tput sgr0) "Failed"  | tee -a  $Logs_path/local.log
+            exit
         fi
-        
+
         sh ${Auto_path}/script/restart.sh ${project_name}
         if [ $? -eq 0 ];then
-            echo -e "\e[1;36m"  "$(date +'%F %H:%M') 项目${project_name}部署 " $(tput sgr0) "Success"      | tee -a  $Logs_path/local.log
+            echo -e "\e[1;36m"  "$(date +'%F %H:%M') 项目${project_name}服务启动;脚本restart.sh " $(tput sgr0) "Success"      | tee -a  $Logs_path/local.log
         else
-            echo -e "\e[1;31m"  "$(date +'%F %H:%M') 项目${project_name}部署 " $(tput sgr0) "Failed"       | tee -a  $Logs_path/local.log
+            echo -e "\e[1;31m"  "$(date +'%F %H:%M') 项目${project_name}服务启动 " $(tput sgr0) "Failed"       | tee -a  $Logs_path/local.log
             echo -e "\e[1;31m"  "$(date +'%F %H:%M') 本次部署"  $(tput sgr0) "Failed"  | tee -a  $Logs_path/local.log
 
-            exit 
+            exit
         fi
 
         echo -e "\e[1;35m"  "$(date +'%F %H:%M') 本次部署"  $(tput sgr0) "Success" | tee -a  $Logs_path/local.log
-        exit 
+        exit
     else
         echo -e "\e[1;31m" "请选择正确的数字；结束请按ctrl+c"  ${resettem}
     fi
 done
- 
-
-
-
-
-
-
-
-  
- 
