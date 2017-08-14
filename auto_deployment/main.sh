@@ -115,7 +115,7 @@ EOF
 fi
 
 #从配置文件内获取项目
-eval $( grep  '^Local_name' /root/auto/conf/main.conf )
+eval $( grep  '^Local_name' ${Conf_path}/main.conf )
 
 if [ ${#Local_name[@]} -eq 0 ];then
     echo -e "\e[1;31m" "$(date +'%F %H:%M') 未加载任何项目配置文件；程序退出" $(tput sgr0) | tee -a  $Logs_path/local.log

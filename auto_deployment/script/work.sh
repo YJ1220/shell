@@ -65,7 +65,7 @@ function eval_variate() {
 # Com_name:mvn编译的文件名;有时编译后，会将clone下来的文件名改变
 # Des_name:各生产项目名;即存放于webapps下的 (默认与Sou_name一样)
 # Ser_name:项目Server工作唯一识别信息（默认即为tomcat;多tomcat服务下，需要使用唯一特定标识）
-# Ser_path:Tomcat目录（默认为/usr/local/tomcat） 
+# Ser_path:Tomcat目录（默认为/usr/local/tomcat）
 ######################################配置文件校验########################################
 project_name=$1
 
@@ -77,19 +77,19 @@ fi
 
 #获取R变量Repo_name
 eval $( grep '^Repo_name' ${Conf_path}/${project_name}.conf)   &>/dev/null
-eval_variate 
+eval_variate
 #获取变量Sou_name
 eval $( grep '^Sou_name' ${Conf_path}/${project_name}.conf)    &>/dev/null
-eval_variate 
+eval_variate
 #获取变量Com_name
 eval $( grep '^Com_name' ${Conf_path}/${project_name}.conf)    &>/dev/null
 eval_variate
 #获取变量Des_name
 eval $( grep '^Des_name' ${Conf_path}/${project_name}.conf)    &>/dev/null
-eval_variate 
-#获取变量Ser_name 
+eval_variate
+#获取变量Ser_name
 eval $( grep '^Ser_name' ${Conf_path}/${project_name}.conf)    &>/dev/null
-eval_variate 
+eval_variate
 #获取变量Ser_path
 eval $( grep '^Ser_path' ${Conf_path}/${project_name}.conf)    &>/dev/null
 eval_variate
@@ -177,7 +177,6 @@ echo $Build_num > $Build_id
 #每次work目录
 Work_num=${Work_path}/${Build_num}
 
-
 #每次部署下的具体工作
 Work_logs=${Work_num}/logs
 Work_old=${Work_num}/old_web
@@ -253,6 +252,7 @@ git commit -m "项目${project_name}第${Build_num}次提交"  &>/dev/null
 #判断本次提交状态；成功、没变化或者失败
 if [ $? -eq 0  ];then
     echo -e "\e[1;32m" "$(date +'%F %H:%M') 项目${Des_name}第${Build_num}次部署;获取项目目录变动列表 "  ${resettem} "Success"| tee -a ${Work_logs}/script.log
+    echo 1 > ${Work_logs}/gitstatus
 elif [ $? -eq 1 ];then
     echo -e "\e[1;31m" "$(date +'%F %H:%M') 项目${Des_name}第${Build_num}次部署;项目内容没有变动;中止部署"    ${resettem} | tee -a ${Work_logs}/script.log
     exit 1
@@ -314,15 +314,3 @@ dic_path  "${Ser_path}/webapps"
 #解压USTrade.zip
 unzip -o ${Des_name}.zip
 check_work "解压 ${Des_name}.zip;生产环境文件更新覆盖"
-
-
-
-
-
-
-
-
-
-
-
-
