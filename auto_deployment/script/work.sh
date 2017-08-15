@@ -243,7 +243,7 @@ check_work  "Code源码编译后生成${Sou_name}移动到${Project_repo}"
 
 #获取目录改变列表
 cd ${Project_repo}
-dic_path "${Project_repo}"
+dic_path ${Project_repo}
 
 git add *
 git diff HEAD --name-status >  ${Work_logs}/git_diff.log
@@ -300,7 +300,7 @@ else
 fi
 
 if `grep -q '^D'  ${Work_logs}/status.log `;then
-    awk '{ if ($1 == "D") { print $2 }}'  ${Work_path}/$Build_num/git_diff.log | grep "^${Des_name}" | xargs rm -rf
+    awk '{ if ($1 == "D") { print $2 }}'  ${Work_logs}/git_diff.log | grep "^${Des_name}" | xargs rm -rf
     check_work  "删除生产项目内本次变更移除文件"
 fi
 
