@@ -75,8 +75,11 @@ if [ ! -f ${Conf_path}/${project_name}.conf ];then
 	exit 1
 fi
 
-#获取R变量Repo_name
+#获取变量Repo_name
 eval $( grep '^Repo_name' ${Conf_path}/${project_name}.conf)   &>/dev/null
+eval_variate
+#获取变量Branch_name
+eval $( grep '^Bran_name' ${Conf_path}/${project_name}.conf)   &>/dev/null
 eval_variate
 #获取变量Sou_name
 eval $( grep '^Sou_name' ${Conf_path}/${project_name}.conf)    &>/dev/null
@@ -107,6 +110,9 @@ else
 fi
 
 #空值变量为空的赋予默认值
+if [ -z ${Bran_name} ];then
+    Bran_name="master"
+fi
 if [ -z ${Com_name} ];then
 	Com_name=${Sou_name}
 fi
@@ -198,17 +204,26 @@ if [ ! -d  ${Code_path}/${Sou_name} ];then
 	cd   ${Code_path}
 	dic_path "${Code_path}"
 	git clone ${Repo_name} &>${Work_logs}/pull.log
-	check_work  "clone项目${project_name}"
+    check_work  "clone项目${project_name}"
+    cd  ${Code_path}/${Sou_name}
+    if [ ${Bran_name} != "master" ];then
+        git checkout --track origin/${Bran_name}
+    fi
 else
 	cd  ${Code_path}/${Sou_name}
 	dic_path ${Code_path}/${Sou_name}
+    ##切换分支
+    if [ ${Bran_name} != "master" ];then
+        git checkout ${Bran_name}
+    fi
 	git pull &> ${Work_logs}/pull.log
+    #分支拉取 git pull origin ${Bran_name}
 	check_work  "项目pull"
 fi
 
 ##项目maven编译
-cd  ${Code_path}/${Sou_name}
 echo -e "\e[1;32m" "$(date +'%F %H:%M') 开始编译项目${project_name}"  $(tput sgr0) | tee -a  ${Work_logs}/script.log
+
 
 /usr/local/maven/bin/mvn clean package -DskipTests  &> ${Work_logs}/build.log
 check_work "项目打包"
