@@ -61,6 +61,7 @@ function eval_variate() {
 
 
 # Repo_name:项目项目地址（不能为空）
+# Bran_name:项目的分支(默认为master)
 # Sou_name:git clone的项目名；即项目clone下的文件名;存放在code目录（不能为空）
 # Com_name:mvn编译的文件名;有时编译后，会将clone下来的文件名改变
 # Des_name:各生产项目名;即存放于webapps下的 (默认与Sou_name一样)
