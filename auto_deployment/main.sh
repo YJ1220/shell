@@ -96,6 +96,9 @@ Local_name=()
 # Git_repo: 项目项目地址（不能为空）
 # Repo_name=
 
+# Branch_name： 远程项目分支（默认为master）
+# Bran_name=
+
 # Source_name: git clone的项目名；即项目clone下的文件名;存放在code目录(不能为空)
 # Sou_name=
 

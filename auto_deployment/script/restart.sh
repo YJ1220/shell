@@ -62,7 +62,7 @@ function start_server() {
 
 
 # Ser_name:项目Server工作唯一识别信息（默认即为tomcat;多tomcat服务下，需要使用唯一特定标识）
-# Ser_path:Tomcat目录（默认为/usr/local/tomcat） 
+# Ser_path:Tomcat目录（默认为/usr/local/tomcat）
 #####################################获取变量########################################
 
 project_name=$1
