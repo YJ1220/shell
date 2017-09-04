@@ -110,31 +110,43 @@ build_id=`cat ${Project_path}/${project_name}/build.txt`
 
 echo -e "\e[1;36m" "当前版本为${build_id}"   $(tput sgr0) | tee -a ${Logs_path}/reset.log
 
-
-
-if [ ! -f ${Project_path}/${project_name}/workspace/${build_id}/logs/gitstatus ];then
-    echo  -e "\e[1;31m"  "$(date +'%F %H:%M') gitstatus文件不存在，上次部署本地git commit 失败;"  $(tput sgr0)  | tee -a ${Logs_path}/reset.log
-    exit 1
-fi
-
-
-
-
 if [ -f ${Ser_path}/webapps/${Des_name}.zip ];then
     rm -rf ${Ser_path}/webapps/${Des_name}.zip
     check_work "删除生产环境下项目的zip文件"
 fi
 
-cd ${Ser_path}/webapps
-dic_path ${Ser_path}/webapps
 
-#删除本次版本更新新增文件
-if `grep -q '^A'  ${Project_path}/${project_name}/workspace/${build_id}/logs/status.log `;then
-    awk '{ if ($1 == "A") { print $2 }}'  ${Project_path}/${project_name}/workspace/${build_id}/logs/git_diff.log | grep "^${Des_name}" | xargs rm -rf
-    check_work "删除生产项目内当前版本新增文件"
+if [ ! -f ${Project_path}/${project_name}/workspace/${build_id}/logs/gitstatus ];then
+    echo  -e "\e[1;31m"  "$(date +'%F %H:%M') gitstatus文件不存在，上次部署本地git commit未执行;"  $(tput sgr0)  | tee -a ${Logs_path}/reset.log
 else
-    echo -e "\e[1;36m" "$(date +'%F %H:%M') 本次版本更新未增加新文件；不用删除项目内的文件"    $(tput sgr0) | tee -a  ${Logs_path}/reset.log
+
+    cd ${Ser_path}/webapps
+    dic_path ${Ser_path}/webapps
+
+    #删除本次版本更新新增文件
+    if `grep -q '^A'  ${Project_path}/${project_name}/workspace/${build_id}/logs/status.log `;then
+        awk '{ if ($1 == "A") { print $2 }}'  ${Project_path}/${project_name}/workspace/${build_id}/logs/git_diff.log | grep "^${Des_name}" | xargs rm -rf
+        check_work "删除生产项目内当前版本新增文件"
+    else
+        echo -e "\e[1;36m" "$(date +'%F %H:%M') 本次版本更新未增加新文件；不用删除项目内的文件"    $(tput sgr0) | tee -a  ${Logs_path}/reset.log
+    fi
+
+    #Build目录下回退到上一版本
+    cd ${Local_repo}/${project_name}_repo
+    dic_path "${Local_repo}/${project_name}_repo"
+
+    echo -e "\e[1;36m" "$(date +'%F %H:%M') 本地repo目录下版本回退到上一版本"  $(tput sgr0) | tee -a  ${Logs_path}/reset.log
+    git reset --hard HEAD^  &>/dev/null
+    check_work "本地repo目录版本回退"
+
 fi
+
+
+
+
+
+
+
 
 #当前版本回退;原备份文件恢复
 if [ -f ${Project_path}/${project_name}/workspace/${build_id}/old_web/${Des_name}.zip  ];then
@@ -165,13 +177,7 @@ check_work  "修改版本ID回退为上一版本ID"
 echo    "${Build_num}"   >   ${Project_path}/${project_name}/build.txt
 
 
-#Build目录下回退到上一版本
-cd ${Local_repo}/${project_name}_repo
-dic_path "${Local_repo}/${project_name}_repo"
 
-echo -e "\e[1;36m" "$(date +'%F %H:%M') 本地repo目录下版本回退到上一版本"  $(tput sgr0) | tee -a  ${Logs_path}/reset.log
-git reset --hard HEAD^  &>/dev/null
-check_work "本地repo目录版本回退"
 
 Status_num=`ps aux | grep  ${Ser_name}  | grep -v grep | wc -l`
 check_work "获取${project_name}服务运行状态"
