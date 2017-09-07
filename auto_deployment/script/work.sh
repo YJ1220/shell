@@ -1,4 +1,4 @@
-#!/bin/baash
+#!/bin/bash
 ############################main###############################################
 # Note: 项目部署脚本
 # Author:YJ
@@ -209,6 +209,7 @@ if [ ! -d  ${Code_path}/${Sou_name} ];then
     cd  ${Code_path}/${Sou_name}
     if [ ${Bran_name} != "master" ];then
         git checkout --track origin/${Bran_name}
+        check_work "项目分支切换到${Bran_name}"
     fi
 else
 	cd  ${Code_path}/${Sou_name}
@@ -216,6 +217,7 @@ else
     ##切换分支
     if [ ${Bran_name} != "master" ];then
         git checkout ${Bran_name}
+        check_work "项目分支切换到${Bran_name}"
     fi
 	git pull &> ${Work_logs}/pull.log
     #分支拉取 git pull origin ${Bran_name}
