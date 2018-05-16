@@ -298,7 +298,7 @@ check_work  "移动编译后增量压缩文件到new_web"
 
 #进入生产环境目录；将原有项目在本次构建中修改和删除的文件进行打包压缩，将压缩后的文件移动到本次work下的old_web目录下
 if [ -f ${Ser_path}/webapps/${Des_name}.zip ];then
-    rm -rf ${Ser_path}/webapps/${Des_name}.zip
+    rm -f ${Ser_path}/webapps/${Des_name}.zip
     check_work "删除生产环境目录下${Des_name}.zip"
 fi
 
@@ -318,7 +318,7 @@ else
 fi
 
 if `grep -q '^D'  ${Work_logs}/status.log `;then
-    awk '{ if ($1 == "D") { print $2 }}'  ${Work_logs}/git_diff.log | grep "^${Des_name}" | xargs rm -rf
+    awk '{ if ($1 == "D") { print $2 }}'  ${Work_logs}/git_diff.log | grep "^${Des_name}" | xargs rm -f
     check_work  "删除生产项目内本次变更移除文件"
 fi
 
