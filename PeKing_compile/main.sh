@@ -142,17 +142,6 @@ do
             echo -e "\e[1;31m"  "$(date +'%F %H:%M') 本次部署"  $(tput sgr0) "Failed"  | tee -a  $Logs_path/local.log
             exit
         fi
-
-        sh ${Auto_path}/script/restart.sh ${project_name}
-        if [ $? -eq 0 ];then
-            echo -e "\e[1;36m"  "$(date +'%F %H:%M') 项目${project_name}服务启动;脚本restart.sh运行 " $(tput sgr0) "Success"      | tee -a  $Logs_path/local.log
-        else
-            echo -e "\e[1;31m"  "$(date +'%F %H:%M') 项目${project_name}服务启动 " $(tput sgr0) "Failed"       | tee -a  $Logs_path/local.log
-            echo -e "\e[1;31m"  "$(date +'%F %H:%M') 本次部署"  $(tput sgr0) "Failed"  | tee -a  $Logs_path/local.log
-
-            exit
-        fi
-
         echo -e "\e[1;35m"  "$(date +'%F %H:%M') 本次部署"  $(tput sgr0) "Success" | tee -a  $Logs_path/local.log
         exit
     else
